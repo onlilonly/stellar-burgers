@@ -1,6 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit';
 import ingredientsSlice from './ingredientsSlice';
 import constructorSlice from './constructorSlice';
+import feedsSlice from './feedsSlice';
 
 import {
   TypedUseSelectorHook,
@@ -16,7 +17,8 @@ import { BurgerConstructor } from '@components';
 const store = configureStore({
   reducer: {
     ingredients: ingredientsSlice,
-    burgerConstructor: constructorSlice
+    burgerConstructor: constructorSlice,
+    feeds: feedsSlice
   },
   devTools: process.env.NODE_ENV !== 'production'
 });
