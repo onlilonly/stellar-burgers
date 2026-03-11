@@ -11,19 +11,24 @@ import {
 } from '@pages';
 import { Modal, OrderInfo, IngredientDetails } from '@components';
 import { AppDispatch, RootState } from '../../services/store';
-import {
-  fetchIngredients,
-  fetchIngredientsById
-} from '../../services/ingredientsSlice';
+import { fetchIngredients } from '../../services/ingredientsSlice';
 import '../../index.css';
 import styles from './app.module.css';
 
-import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
+import {
+  Routes,
+  Route,
+  useLocation,
+  useNavigate,
+  useMatch
+} from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { useEffect, useLayoutEffect } from 'react';
+import { useEffect } from 'react';
 
 import { AppHeader } from '@components';
 import { Preloader } from '@ui';
+import { ProtectedRoute } from '../protectedRoutes/protectedRoute';
+import { checkUserAuth } from '../../services/userSlice';
 
 const App = () => {
   /** TODO: взять переменные из стора */
@@ -49,20 +54,12 @@ const App = () => {
 
   useEffect(() => {
     dispatch(fetchIngredients());
+    dispatch(checkUserAuth());
   }, []);
 
-  useLayoutEffect(() => {
-    const pathParts = location.pathname.split('/');
-    if (pathParts[1] === 'ingredients') {
-      const ingredientId = pathParts[2];
-      if (
-        ingredientId &&
-        (!selectedIngredient || selectedIngredient?._id !== ingredientId)
-      ) {
-        dispatch(fetchIngredientsById(ingredientId));
-      }
-    }
-  }, [selectedIngredient, location.pathname, dispatch]);
+  const profileMatch = useMatch('/profile/orders/:number')?.params.number;
+  const feedMatch = useMatch('/feed/:number')?.params.number;
+  const orderNumber = profileMatch || feedMatch;
 
   return (
     <div className={styles.app}>
@@ -78,19 +75,85 @@ const App = () => {
           <Routes location={background || location}>
             <Route path='/' element={<ConstructorPage />} />
             <Route path='/feed' element={<Feed />} />
-            <Route path='/login' element={<Login />} />
-            <Route path='/register' element={<Register />} />
-            <Route path='/forgot-password' element={<ForgotPassword />} />
-            <Route path='/reset-password' element={<ResetPassword />} />
-            <Route path='/profile' element={<Profile />} />
-            <Route path='/profile/orders' element={<ProfileOrders />} />
+            <Route
+              path='/login'
+              element={
+                <ProtectedRoute onlyUnAuth>
+                  <Login />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path='/register'
+              element={
+                <ProtectedRoute onlyUnAuth>
+                  <Register />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path='/forgot-password'
+              element={
+                <ProtectedRoute onlyUnAuth>
+                  <ForgotPassword />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path='/reset-password'
+              element={
+                <ProtectedRoute onlyUnAuth>
+                  <ResetPassword />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path='/profile'
+              element={
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path='/profile/orders'
+              element={
+                <ProtectedRoute>
+                  <ProfileOrders />
+                </ProtectedRoute>
+              }
+            />
             <Route path='*' element={<NotFound404 />} />
             <Route
               path='/ingredients/:id'
               element={
-                <Modal title='' onClose={handleClose}>
+                <Modal title='Детали ингредиента' onClose={handleClose}>
                   <IngredientDetails />
                 </Modal>
+              }
+            />
+            <Route
+              path='/feed/:number'
+              element={
+                <Modal
+                  title={`#${orderNumber && orderNumber.padStart(6, '0')}`}
+                  onClose={handleClose}
+                >
+                  <OrderInfo />
+                </Modal>
+              }
+            />
+            <Route
+              path='/profile/orders/:number'
+              element={
+                <ProtectedRoute>
+                  <Modal
+                    title={`#${orderNumber && orderNumber.padStart(6, '0')}`}
+                    onClose={handleClose}
+                  >
+                    <OrderInfo />
+                  </Modal>
+                </ProtectedRoute>
               }
             />
           </Routes>
@@ -99,7 +162,10 @@ const App = () => {
               <Route
                 path='/feed/:number'
                 element={
-                  <Modal title='' onClose={handleClose}>
+                  <Modal
+                    title={`#${orderNumber && orderNumber.padStart(6, '0')}`}
+                    onClose={handleClose}
+                  >
                     <OrderInfo />
                   </Modal>
                 }
@@ -107,7 +173,7 @@ const App = () => {
               <Route
                 path='/ingredients/:id'
                 element={
-                  <Modal title='' onClose={handleClose}>
+                  <Modal title='Детали ингредиента' onClose={handleClose}>
                     <IngredientDetails />
                   </Modal>
                 }
@@ -115,9 +181,14 @@ const App = () => {
               <Route
                 path='/profile/orders/:number'
                 element={
-                  <Modal title='' onClose={handleClose}>
-                    <OrderInfo />
-                  </Modal>
+                  <ProtectedRoute>
+                    <Modal
+                      title={`#${orderNumber && orderNumber.padStart(6, '0')}`}
+                      onClose={handleClose}
+                    >
+                      <OrderInfo />
+                    </Modal>
+                  </ProtectedRoute>
                 }
               />
             </Routes>

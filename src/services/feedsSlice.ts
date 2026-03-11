@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { getFeedsApi } from '@api';
 import { TOrder, TOrdersData } from '@utils-types';
 
@@ -42,9 +42,15 @@ const feedsSlice = createSlice({
       })
       .addCase(fetchFeeds.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.orders = action.payload.orders;
-        state.total = action.payload.total;
-        state.totalToday = action.payload.totalToday;
+        const oldOrders = state.orders.map((elem) => elem._id).join(',');
+        const newOrders = action.payload.orders
+          .map((elem) => elem._id)
+          .join(',');
+        if (oldOrders !== newOrders) {
+          state.orders = action.payload.orders;
+          state.total = action.payload.total;
+          state.totalToday = action.payload.totalToday;
+        }
       })
       .addCase(fetchFeeds.rejected, (state, action) => {
         state.isLoading = false;

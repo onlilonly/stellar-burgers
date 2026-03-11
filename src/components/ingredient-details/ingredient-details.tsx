@@ -1,14 +1,24 @@
-import { FC } from 'react';
-import { useSelector } from 'react-redux';
-import { RootState } from 'src/services/store';
+import { FC, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch, RootState } from '../../services/store';
 import { Preloader } from '../ui/preloader';
 import { IngredientDetailsUI } from '../ui/ingredient-details';
+import { fetchIngredientsById } from '../../services/ingredientsSlice';
+import { useParams } from 'react-router-dom';
 
 export const IngredientDetails: FC = () => {
   /** TODO: взять переменную из стора */
+  const dispatch = useDispatch<AppDispatch>();
   const ingredientData = useSelector(
     (state: RootState) => state.ingredients.selectedIngredient
   );
+
+  const { ingredientId } = useParams<{ ingredientId: string }>();
+
+  useEffect(() => {
+    if (!ingredientId) return;
+    dispatch(fetchIngredientsById(ingredientId));
+  }, [ingredientId, dispatch]);
 
   if (!ingredientData) {
     return <Preloader />;

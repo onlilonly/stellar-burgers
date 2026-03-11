@@ -1,8 +1,7 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { getIngredientsApi } from '@api';
-import { TConstructorIngredient } from '@utils-types';
+import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
+import { getOrderByNumberApi, orderBurgerApi } from '@api';
+import { TConstructorIngredient, TIngredient, TOrder } from '@utils-types';
 import { v4 as uuid } from 'uuid';
-import { stat } from 'fs';
 
 type ConstructorState = {
   items: {
@@ -11,29 +10,55 @@ type ConstructorState = {
   };
   isLoading: boolean;
   error: string | null;
+  orderConstructorData: TOrder | null;
+  orderFeedData: TOrder | null;
 };
 
 const initialState: ConstructorState = {
   items: { bun: null, ingredients: [] },
   isLoading: false,
-  error: null
+  error: null,
+  orderConstructorData: null,
+  orderFeedData: null
 };
+
+export const createOrder = createAsyncThunk(
+  'burgerConstructor/createOrder',
+  (items: string[], { dispatch }) =>
+    orderBurgerApi(items).then(({ order }) => {
+      dispatch(clearConstructorModal());
+      return { ...order, ingredients: items };
+    })
+);
+
+export const getOrderByNumber = createAsyncThunk(
+  'burgerConstructor/getOrderByNumber',
+  async (number: number) => {
+    const order = await getOrderByNumberApi(number);
+    return order.orders[0];
+  }
+);
 
 const constructorSlice = createSlice({
   name: 'burgerConstructor',
   initialState,
   reducers: {
-    addIngredient: (state, action: PayloadAction<TConstructorIngredient>) => {
-      const item = action.payload;
-      if (item.type === 'bun') {
-        state.items.bun = { ...item, id: uuid() };
-      } else {
-        state.items.ingredients.splice(
-          Math.floor(state.items.ingredients.length / 2),
-          0,
-          { ...item, id: uuid() }
-        );
-      }
+    addIngredient: {
+      reducer: (state, { payload }: PayloadAction<TConstructorIngredient>) => {
+        const item = payload;
+        if (item.type === 'bun') {
+          state.items.bun = payload;
+        } else {
+          state.items.ingredients.splice(
+            Math.floor(state.items.ingredients.length / 2),
+            0,
+            payload
+          );
+        }
+      },
+      prepare: (ingredient: TIngredient) => ({
+        payload: { ...ingredient, id: uuid() }
+      })
     },
     removeIngredient: (
       state,
@@ -62,7 +87,41 @@ const constructorSlice = createSlice({
       );
       const deletedElem = state.items.ingredients.splice(index, 1)[0];
       state.items.ingredients.splice(index + 1, 0, deletedElem);
+    },
+    clearConstructorModal: (state) => {
+      state.orderConstructorData = null;
+    },
+    clearFeedModal: (state) => {
+      state.orderFeedData = null;
     }
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(createOrder.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(createOrder.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.orderConstructorData = action.payload;
+      })
+      .addCase(createOrder.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.error.message || 'Не удалось создать заказ';
+      })
+      .addCase(getOrderByNumber.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(getOrderByNumber.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.orderFeedData = action.payload;
+      })
+      .addCase(getOrderByNumber.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error =
+          action.error.message || 'Не загрузить информацию о заказе';
+      });
   }
 });
 
@@ -70,6 +129,8 @@ export const {
   addIngredient,
   removeIngredient,
   moveUpIngredient,
-  moveDownIngredient
+  moveDownIngredient,
+  clearConstructorModal,
+  clearFeedModal
 } = constructorSlice.actions;
 export default constructorSlice.reducer;
