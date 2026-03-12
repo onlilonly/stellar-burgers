@@ -53,10 +53,12 @@ export const checkUserAuth = createAsyncThunk(
 
 export const registerUser = createAsyncThunk<TAuthResponse, TRegisterData>(
   'user/registerUser',
-  async (userData) => {
-    const data = await registerUserApi(userData);
-    return data;
-  }
+  async (userData) =>
+    await registerUserApi(userData).then((data) => {
+      localStorage.setItem('refreshToken', data.refreshToken);
+      setCookie('accessToken', data.accessToken);
+      return data;
+    })
 );
 
 export const updateUser = createAsyncThunk<TUser, TRegisterData>(
@@ -69,14 +71,19 @@ export const updateUser = createAsyncThunk<TUser, TRegisterData>(
 
 export const loginUser = createAsyncThunk<TAuthResponse, TLoginData>(
   'user/loginUser',
-  async (userData) => {
-    const data = await loginUserApi(userData);
-    return data;
-  }
+  async (userData) =>
+    await loginUserApi(userData).then((data) => {
+      localStorage.setItem('refreshToken', data.refreshToken);
+      setCookie('accessToken', data.accessToken);
+      return data;
+    })
 );
 
 export const logoutUser = createAsyncThunk('user/logoutUser', async () => {
-  await logoutApi();
+  await logoutApi().then(() => {
+    localStorage.removeItem('refreshToken');
+    deleteCookie('accessToken');
+  });
 });
 
 export const getUserOrders = createAsyncThunk<TOrder[]>(
@@ -117,8 +124,6 @@ const userSlice = createSlice({
       .addCase(registerUser.fulfilled, (state, action) => {
         state.isLoading = false;
         state.user = action.payload.user;
-        localStorage.setItem('refreshToken', action.payload.refreshToken);
-        setCookie('accessToken', action.payload.accessToken);
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.isLoading = false;
@@ -145,8 +150,6 @@ const userSlice = createSlice({
       .addCase(loginUser.fulfilled, (state, action) => {
         state.isLoading = false;
         state.user = action.payload.user;
-        localStorage.setItem('refreshToken', action.payload.refreshToken);
-        setCookie('accessToken', action.payload.accessToken);
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.isLoading = false;
@@ -160,8 +163,6 @@ const userSlice = createSlice({
       .addCase(logoutUser.fulfilled, (state) => {
         state.isLoading = false;
         state.user = null;
-        localStorage.removeItem('refreshToken');
-        deleteCookie('accessToken');
       })
       .addCase(logoutUser.rejected, (state, action) => {
         state.isLoading = false;

@@ -13,12 +13,12 @@ export const IngredientDetails: FC = () => {
     (state: RootState) => state.ingredients.selectedIngredient
   );
 
-  const { ingredientId } = useParams<{ ingredientId: string }>();
+  const { id } = useParams<{ id: string }>();
 
   useEffect(() => {
-    if (!ingredientId) return;
-    dispatch(fetchIngredientsById(ingredientId));
-  }, [ingredientId, dispatch]);
+    if (!id || ingredientData) return;
+    dispatch(fetchIngredientsById(id));
+  }, [id, dispatch]);
 
   if (!ingredientData) {
     return <Preloader />;

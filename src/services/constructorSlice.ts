@@ -26,7 +26,7 @@ export const createOrder = createAsyncThunk(
   'burgerConstructor/createOrder',
   (items: string[], { dispatch }) =>
     orderBurgerApi(items).then(({ order }) => {
-      dispatch(clearConstructorModal());
+      dispatch(resetConstructor());
       return { ...order, ingredients: items };
     })
 );
@@ -88,11 +88,12 @@ const constructorSlice = createSlice({
       const deletedElem = state.items.ingredients.splice(index, 1)[0];
       state.items.ingredients.splice(index + 1, 0, deletedElem);
     },
-    clearConstructorModal: (state) => {
-      state.orderConstructorData = null;
-    },
+    resetConstructor: () => initialState,
     clearFeedModal: (state) => {
       state.orderFeedData = null;
+    },
+    clearConstructorModal: (state) => {
+      state.orderConstructorData = null;
     }
   },
   extraReducers: (builder) => {
@@ -130,7 +131,8 @@ export const {
   removeIngredient,
   moveUpIngredient,
   moveDownIngredient,
-  clearConstructorModal,
-  clearFeedModal
+  resetConstructor,
+  clearFeedModal,
+  clearConstructorModal
 } = constructorSlice.actions;
 export default constructorSlice.reducer;

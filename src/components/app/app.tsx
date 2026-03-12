@@ -49,7 +49,11 @@ const App = () => {
   const navigate = useNavigate();
 
   const handleClose = () => {
-    navigate(-1);
+    if (background) {
+      navigate(-1);
+    } else {
+      navigate('/');
+    }
   };
 
   useEffect(() => {

@@ -4,8 +4,8 @@ import { BurgerConstructorUI } from '@ui';
 import { useSelector, useDispatch } from 'react-redux';
 import { AppDispatch, RootState } from '../../services/store';
 import {
-  clearConstructorModal,
-  createOrder
+  createOrder,
+  clearConstructorModal
 } from '../../services/constructorSlice';
 import { useNavigate } from 'react-router-dom';
 
