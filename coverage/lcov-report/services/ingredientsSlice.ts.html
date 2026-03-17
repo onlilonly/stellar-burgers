@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">71.25% </span>
+                <span class="strong">83.75% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>57/80</span>
+                <span class='fraction'>67/80</span>
+            </div>
+        
+            
+            <div class='fl pad1y space-right2'>
+                <span class="strong">85.71% </span>
+                <span class="quiet">Branches</span>
+                <span class='fraction'>6/7</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
-                <span class="quiet">Branches</span>
-                <span class='fraction'>1/1</span>
-            </div>
-        
-            
-            <div class='fl pad1y space-right2'>
-                <span class="strong">33.33% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>1/3</span>
+                <span class='fraction'>3/3</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">71.25% </span>
+                <span class="strong">83.75% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>57/80</span>
+                <span class='fraction'>67/80</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line medium'></div>
+    <div class='status-line high'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -184,26 +184,26 @@
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -227,7 +227,7 @@
 import { getIngredientsApi } from '../utils/burger-api';
 import { TIngredient, TConstructorIngredient } from '@utils-types';
 &nbsp;
-type ingredientsState = {
+export type ingredientsState = {
   ingredients: TIngredient[];
   selectedIngredient: TIngredient | null;
   isLoading: boolean;
@@ -263,27 +263,27 @@ const ingredientsSlice = createSlice({
   name: 'ingredients',
   initialState,
   reducers: {
-    setSelectedIngredient: <span class="fstat-no" title="function not covered" >(state, action: PayloadAction&lt;TIngredient&gt;) =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >      state.selectedIngredient = action.payload;</span>
+    setSelectedIngredient: (state, action: PayloadAction&lt;TIngredient&gt;) =&gt; {
+      state.selectedIngredient = action.payload;
     },
-    clearSelectedIngredient: <span class="fstat-no" title="function not covered" >(state) =&gt; {</span>
-<span class="cstat-no" title="statement not covered" >      state.selectedIngredient = null;</span>
-<span class="cstat-no" title="statement not covered" >    }</span>
+    clearSelectedIngredient: (state) =&gt; {
+      state.selectedIngredient = null;
+    }
   },
   extraReducers: (builder) =&gt; {
     builder
       .addCase(fetchIngredients.pending, (state) =&gt; {
-<span class="cstat-no" title="statement not covered" >        state.isLoading = true;</span>
-<span class="cstat-no" title="statement not covered" >        state.error = null;</span>
+        state.isLoading = true;
+        state.error = null;
       })
       .addCase(fetchIngredients.fulfilled, (state, action) =&gt; {
-<span class="cstat-no" title="statement not covered" >        state.isLoading = false;</span>
-<span class="cstat-no" title="statement not covered" >        state.ingredients = action.payload;</span>
+        state.isLoading = false;
+        state.ingredients = action.payload;
       })
       .addCase(fetchIngredients.rejected, (state, action) =&gt; {
-<span class="cstat-no" title="statement not covered" >        state.isLoading = false;</span>
-<span class="cstat-no" title="statement not covered" >        state.error =</span>
-<span class="cstat-no" title="statement not covered" >          action.error.message || 'Не удалось загрузить ингредиенты';</span>
+        state.isLoading = false;
+        state.error =
+          action.error.message<span class="branch-0 cbranch-no" title="branch not covered" > || 'Не удалось загрузить ингредиенты';</span>
       })
       .addCase(fetchIngredientsById.pending, (state) =&gt; {
 <span class="cstat-no" title="statement not covered" >        state.isLoading = true;</span>
@@ -310,7 +310,7 @@ export default ingredientsSlice.reducer;
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-03-17T09:01:27.777Z
+                at 2026-03-17T09:25:17.522Z
             </div>
         <script src="../prettify.js"></script>
         <script>
