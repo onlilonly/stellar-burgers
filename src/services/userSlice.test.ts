@@ -48,7 +48,7 @@ describe('проверяем редьюсеры слайса user', () => {
       '643d69a5c3f7b9001cfa0947',
       '643d69a5c3f7b9001cfa0947',
       '643d69a5c3f7b9001cfa093c'
-    ],
+    ]
   };
 
   const registerResponse = {
@@ -297,7 +297,10 @@ describe('проверяем редьюсеры слайса user', () => {
     test('проверяем работу rejected', () => {
       const newStateRejected = userSlice(
         initialState,
-        getUserOrders.rejected(new Error('Не удалось загрузить заказы пользователя'), '')
+        getUserOrders.rejected(
+          new Error('Не удалось загрузить заказы пользователя'),
+          ''
+        )
       );
       expect(newStateRejected).toEqual(stateRejectedOrders);
     });
