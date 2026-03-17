@@ -5,10 +5,15 @@ import constructorSlice, {
   removeIngredient,
   moveDownIngredient,
   moveUpIngredient,
-  ConstructorState
+  clearConstructorModal,
+  clearFeedModal,
+  resetConstructor,
+  ConstructorState,
+  createOrder,
+  getOrderByNumber
 } from './constructorSlice';
 
-describe('проверяем редьюсер слайса burgerConstructor', () => {
+describe('проверяем редьюсеры слайса burgerConstructor', () => {
   const initialState: ConstructorState = {
     items: { bun: null, ingredients: [] },
     isLoading: false,
@@ -78,49 +83,207 @@ describe('проверяем редьюсер слайса burgerConstructor', (
       'https://code.s3.yandex.net/react/code/mineral_rings-large.png',
     __v: 0
   };
+  const testOrder = {
+    _id: '69b8f47ea64177001b32fe10',
+    ingredients: [
+      '643d69a5c3f7b9001cfa093c',
+      '643d69a5c3f7b9001cfa0941',
+      '643d69a5c3f7b9001cfa0941',
+      '643d69a5c3f7b9001cfa0940',
+      '643d69a5c3f7b9001cfa0940',
+      '643d69a5c3f7b9001cfa0947',
+      '643d69a5c3f7b9001cfa0947',
+      '643d69a5c3f7b9001cfa093c'
+    ],
+    status: 'done',
+    name: 'Био-марсианский фалленианский метеоритный краторный бургер',
+    createdAt: '2026-03-17T06:28:14.750Z',
+    updatedAt: '2026-03-17T06:28:15.038Z',
+    number: 102937
+  };
+  const testOrderForApi = {
+    _id: '643d69a5c3f7b9001cfa093g',
+    status: 'done',
+    name: 'Test Order',
+    ingredients: [bun._id, ingredientFst._id, ingredientScnd._id],
+    owner: {
+      name: 'Тест Тестович',
+      email: 'test@mail.ru',
+      createdAt: '2026-03-16T12:00:00.000Z',
+      updatedAt: '2026-03-16T12:00:00.000Z'
+    },
+    createdAt: '2026-03-16T12:00:00.000Z',
+    updatedAt: '2026-03-16T12:00:00.000Z',
+    number: 102920,
+    price: 2934
+  };
+  const statePending = {
+    ...initialState,
+    isLoading: true
+  };
+  const stateFulfilled = {
+    ...initialState,
+    orderConstructorData: testOrderForApi
+  };
+  const stateRejected = {
+    ...initialState,
+    error: 'Не удалось создать заказ'
+  };
+  const stateFulfilledGetOrder = {
+    ...initialState,
+    orderFeedData: testOrderForApi
+  };
+  const stateRejectedGetOrder = {
+    ...initialState,
+    error: 'Не загрузить информацию о заказе'
+  };
 
-  test('должен добавлять ингредиент', () => {
-    const newState = constructorSlice(initialState, addIngredient(bun));
-    const { items } = newState;
-    expect(items.bun).toMatchObject({
-      _id: bun._id,
-      name: bun.name,
-      price: bun.price
+  describe('проверяем работу редьюсеров', () => {
+    test('должен добавлять ингредиент', () => {
+      const newState = constructorSlice(initialState, addIngredient(bun));
+      const { items } = newState;
+      expect(items.bun).toMatchObject({
+        _id: bun._id,
+        name: bun.name,
+        price: bun.price
+      });
+      expect(items.bun?.id).toBeDefined();
     });
-    expect(items.bun?.id).toBeDefined();
+
+    test('должен удалять ингредиент', () => {
+      const newState = constructorSlice(
+        { ...initialState, items: { bun: null, ingredients: [ingredientThd] } },
+        removeIngredient(ingredientThd)
+      );
+      expect(newState.items.bun).toBe(null);
+      expect(newState.items.bun?.id).not.toBeDefined();
+    });
+
+    test('должен менять порядок ингредиентов(учитываем, что ингредиент вставляется в центр)', () => {
+      let newState = initialState;
+      newState = constructorSlice(newState, addIngredient(ingredientFst));
+      newState = constructorSlice(newState, addIngredient(ingredientScnd));
+      newState = constructorSlice(newState, addIngredient(ingredientThd));
+
+      expect(newState.items.ingredients[0]._id).toBe(ingredientScnd._id);
+      expect(newState.items.ingredients[1]._id).toBe(ingredientThd._id);
+      expect(newState.items.ingredients[2]._id).toBe(ingredientFst._id);
+
+      newState = constructorSlice(
+        newState,
+        moveUpIngredient(newState.items.ingredients[1])
+      );
+      expect(newState.items.ingredients[0]._id).toBe(ingredientThd._id);
+      expect(newState.items.ingredients[1]._id).toBe(ingredientScnd._id);
+      expect(newState.items.ingredients[2]._id).toBe(ingredientFst._id);
+
+      newState = constructorSlice(
+        newState,
+        moveDownIngredient(newState.items.ingredients[1])
+      );
+      expect(newState.items.ingredients[0]._id).toBe(ingredientThd._id);
+      expect(newState.items.ingredients[1]._id).toBe(ingredientFst._id);
+      expect(newState.items.ingredients[2]._id).toBe(ingredientScnd._id);
+    });
+
+    test('должен очищать данные модального окна созданного заказа', () => {
+      const newState = constructorSlice(
+        { ...initialState, orderConstructorData: testOrder },
+        clearConstructorModal()
+      );
+      expect(newState.orderConstructorData).toBe(null);
+    });
+
+    test('должен очищать данные модального окна feeds', () => {
+      const newState = constructorSlice(
+        { ...initialState, orderFeedData: testOrder },
+        clearFeedModal()
+      );
+      expect(newState.orderConstructorData).toBe(null);
+    });
+
+    test('должен очищать конструктор до исходного состояния', () => {
+      let newState = initialState;
+      newState = constructorSlice(newState, addIngredient(ingredientFst));
+      newState = constructorSlice(newState, addIngredient(ingredientScnd));
+      newState = constructorSlice(newState, addIngredient(ingredientThd));
+      newState = constructorSlice(
+        {
+          ...initialState,
+          orderFeedData: testOrder,
+          orderConstructorData: testOrder
+        },
+        resetConstructor()
+      );
+      expect(newState).toEqual(initialState);
+    });
   });
 
-  test('должен удалять ингредиент', () => {
-    const newState = constructorSlice(initialState, removeIngredient(bun));
-    const { items } = newState;
-    expect(items.bun).toBe(null);
-    expect(items.bun?.id).not.toBeDefined();
+  describe('createOrder', () => {
+    test('проверяем работу pending', () => {
+      const newStatePending = constructorSlice(
+        initialState,
+        createOrder.pending('Loading...', [
+          bun._id,
+          ingredientFst._id,
+          ingredientScnd._id
+        ])
+      );
+      expect(newStatePending).toEqual(statePending);
+    });
+
+    test('проверяем работу fulfilled', () => {
+      const newStateFulfilled = constructorSlice(
+        initialState,
+        createOrder.fulfilled(testOrderForApi, '', [
+          bun._id,
+          ingredientFst._id,
+          ingredientScnd._id
+        ])
+      );
+      expect(newStateFulfilled).toEqual(stateFulfilled);
+    });
+
+    test('проверяем работу rejected', () => {
+      const newStateRejected = constructorSlice(
+        initialState,
+        createOrder.rejected(new Error('Не удалось создать заказ'), '', [
+          bun._id,
+          ingredientFst._id,
+          ingredientScnd._id
+        ])
+      );
+      expect(newStateRejected).toEqual(stateRejected);
+    });
   });
 
-  test('должен менять порядок ингредиентов(учитываем, что ингредиент вставляется в центр)', () => {
-    let newState = initialState;
-    newState = constructorSlice(newState, addIngredient(ingredientFst));
-    newState = constructorSlice(newState, addIngredient(ingredientScnd));
-    newState = constructorSlice(newState, addIngredient(ingredientThd));
+  describe('getOrderByNumber', () => {
+    test('проверяем работу pending', () => {
+      const newStatePending = constructorSlice(
+        initialState,
+        getOrderByNumber.pending('Loading...', testOrderForApi.number)
+      );
+      expect(newStatePending).toEqual(statePending);
+    });
 
-    expect(newState.items.ingredients[0]._id).toBe(ingredientScnd._id);
-    expect(newState.items.ingredients[1]._id).toBe(ingredientThd._id);
-    expect(newState.items.ingredients[2]._id).toBe(ingredientFst._id);
+    test('проверяем работу fulfilled', () => {
+      const newStateFulfilled = constructorSlice(
+        initialState,
+        getOrderByNumber.fulfilled(testOrderForApi, '', testOrderForApi.number)
+      );
+      expect(newStateFulfilled).toEqual(stateFulfilledGetOrder);
+    });
 
-    newState = constructorSlice(
-      newState,
-      moveUpIngredient(newState.items.ingredients[1])
-    );
-    expect(newState.items.ingredients[0]._id).toBe(ingredientThd._id);
-    expect(newState.items.ingredients[1]._id).toBe(ingredientScnd._id);
-    expect(newState.items.ingredients[2]._id).toBe(ingredientFst._id);
-
-    newState = constructorSlice(
-      newState,
-      moveDownIngredient(newState.items.ingredients[1])
-    );
-    expect(newState.items.ingredients[0]._id).toBe(ingredientThd._id);
-    expect(newState.items.ingredients[1]._id).toBe(ingredientFst._id);
-    expect(newState.items.ingredients[2]._id).toBe(ingredientScnd._id);
+    test('проверяем работу rejected', () => {
+      const newStateRejected = constructorSlice(
+        initialState,
+        getOrderByNumber.rejected(
+          new Error('Не загрузить информацию о заказе'),
+          '',
+          testOrderForApi.number
+        )
+      );
+      expect(newStateRejected).toEqual(stateRejectedGetOrder);
+    });
   });
 });
