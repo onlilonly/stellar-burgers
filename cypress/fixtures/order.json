@@ -1,0 +1,19 @@
+{
+  "success": true,
+  "order": {
+    "_id": "643d69a5c3f7b9001cfa093g",
+    "status": "done",
+    "name": "Test Order",
+    "owner": {
+      "name": "Тест Тестович",
+      "email": "test@mail.ru",
+      "createdAt": "2026-03-16T12:00:00.000Z",
+      "updatedAt": "2026-03-16T12:00:00.000Z"
+    },
+    "createdAt": "2026-03-16T12:00:00.000Z",
+    "updatedAt": "2026-03-16T12:00:00.000Z",
+    "number": 102920,
+    "price": 2934
+  },
+  "name": "Test Order"
+}

@@ -9,7 +9,7 @@ import {
   TLoginData,
   TRegisterData,
   updateUserApi
-} from '@api';
+} from '../utils/burger-api';
 import { TOrder, TUser } from '@utils-types';
 import { deleteCookie, getCookie, setCookie } from '../utils/cookie';
 
