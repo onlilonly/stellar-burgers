@@ -2,6 +2,7 @@ import { expect, test, describe } from '@jest/globals';
 import ingredientsSlice, {
   ingredientsState,
   fetchIngredients,
+  fetchIngredientsById,
   setSelectedIngredient,
   clearSelectedIngredient
 } from './ingredientsSlice';
@@ -37,48 +38,89 @@ describe('проверяем редьюсер слайса ingredients', () => {
     ...initialState,
     ingredients: [testIngredient]
   };
+  const stateFulfilledById = {
+    ...initialState,
+    selectedIngredient: testIngredient
+  };
   const stateRejected = {
     ...initialState,
     error: 'Не удалось загрузить ингредиенты'
   };
+  const stateRejectedById = {
+    ...initialState,
+    error: 'Ингредиент не найден'
+  };
 
-  test('проверяем работу pending', () => {
-    const newStatePending = ingredientsSlice(
-      initialState,
-      fetchIngredients.pending('Loading...')
-    );
-    expect(newStatePending).toEqual(statePending);
+  describe('fetchIngredients', () => {
+    test('проверяем работу fetchIngredients.pending', () => {
+      const newStatePending = ingredientsSlice(
+        initialState,
+        fetchIngredients.pending('Loading...')
+      );
+      expect(newStatePending).toEqual(statePending);
+    });
+
+    test('проверяем работу fetchIngredients.fulfilled', () => {
+      const newStateFulfilled = ingredientsSlice(
+        initialState,
+        fetchIngredients.fulfilled([testIngredient], '')
+      );
+      expect(newStateFulfilled).toEqual(stateFulfilled);
+    });
+
+    test('проверяем работу fetchIngredients.rejected', () => {
+      const newStateRejected = ingredientsSlice(
+        initialState,
+        fetchIngredients.rejected(
+          new Error('Не удалось загрузить ингредиенты'),
+          ''
+        )
+      );
+      expect(newStateRejected).toEqual(stateRejected);
+    });
   });
 
-  test('проверяем работу fulfilled', () => {
-    const newStateFulfilled = ingredientsSlice(
-      initialState,
-      fetchIngredients.fulfilled([testIngredient], '')
-    );
-    expect(newStateFulfilled).toEqual(stateFulfilled);
+  describe('fetchIngredientsById', () => {
+    test('проверяем работу fetchIngredientsById.pending', () => {
+      const newStatePending = ingredientsSlice(
+        initialState,
+        fetchIngredientsById.pending('Loading...', '')
+      );
+      expect(newStatePending).toEqual(statePending);
+    });
+
+    test('проверяем работу fetchIngredientsById.fulfilled', () => {
+      const newStateFulfilled = ingredientsSlice(
+        initialState,
+        fetchIngredientsById.fulfilled(testIngredient, '', '')
+      );
+      expect(newStateFulfilled).toEqual(stateFulfilledById);
+    });
+
+    test('проверяем работу fetchIngredientsById.rejected', () => {
+      const newStateRejected = ingredientsSlice(
+        initialState,
+        fetchIngredientsById.rejected(new Error('Ингредиент не найден'), '', '')
+      );
+      expect(newStateRejected).toEqual(stateRejectedById);
+    });
   });
 
-  test('проверяем работу rejected', () => {
-    const newStateRejected = ingredientsSlice(
-      initialState,
-      fetchIngredients.rejected(
-        new Error('Не удалось загрузить ингредиенты'),
-        ''
-      )
-    );
-    expect(newStateRejected).toEqual(stateRejected);
-  });
+  describe('проверяем работу редьюсеров', () => {
+    test('должен добавлять выбранный ингредиент', () => {
+      const newState = ingredientsSlice(
+        initialState,
+        setSelectedIngredient(testIngredient)
+      );
+      expect(newState.selectedIngredient).toEqual(testIngredient);
+    });
 
-  test('должен добавлять выбранный ингредиент', () => {
-    const newState = ingredientsSlice(
-      initialState,
-      setSelectedIngredient(testIngredient)
-    );
-    expect(newState.selectedIngredient).toEqual(testIngredient);
-  });
-
-  test('должен удалять выбранный ингредиент', () => {
-    const newState = ingredientsSlice(initialState, clearSelectedIngredient());
-    expect(newState.selectedIngredient).toBe(null);
+    test('должен удалять выбранный ингредиент', () => {
+      const newState = ingredientsSlice(
+        initialState,
+        clearSelectedIngredient()
+      );
+      expect(newState.selectedIngredient).toBe(null);
+    });
   });
 });
