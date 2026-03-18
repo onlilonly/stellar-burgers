@@ -1,9 +1,9 @@
 import { createSlice, PayloadAction, createAsyncThunk } from '@reduxjs/toolkit';
-import { getOrderByNumberApi, orderBurgerApi } from '@api';
-import { TConstructorIngredient, TIngredient, TOrder } from '@utils-types';
+import { getOrderByNumberApi, orderBurgerApi } from '../utils/burger-api';
+import { TConstructorIngredient, TIngredient, TOrder } from '../utils/types';
 import { v4 as uuid } from 'uuid';
 
-type ConstructorState = {
+export type ConstructorState = {
   items: {
     ingredients: TConstructorIngredient[];
     bun: TConstructorIngredient | null;

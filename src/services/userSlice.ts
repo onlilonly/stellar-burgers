@@ -9,11 +9,11 @@ import {
   TLoginData,
   TRegisterData,
   updateUserApi
-} from '@api';
+} from '../utils/burger-api';
 import { TOrder, TUser } from '@utils-types';
 import { deleteCookie, getCookie, setCookie } from '../utils/cookie';
 
-type userState = {
+export type userState = {
   user: TUser | null;
   isAuthChecked: boolean;
   isLoading: boolean;
@@ -167,7 +167,7 @@ const userSlice = createSlice({
       .addCase(logoutUser.rejected, (state, action) => {
         state.isLoading = false;
         state.error =
-          action.error.message || 'Не удалось войти в учетную запись';
+          action.error.message || 'Не удалось выйти из учетной записи';
       })
       .addCase(getUserOrders.pending, (state) => {
         state.ordersLoading = true;
