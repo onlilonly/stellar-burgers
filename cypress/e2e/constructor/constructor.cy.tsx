@@ -75,7 +75,8 @@ describe('Конструктор бургера', () => {
   describe('Модальное окно с деталями ингредиента', () => {
     it('должен отрывать модальное окно ингредиента', () => {
       cy.contains('Соус фирменный Space Sauce').click();
-      cy.get('[data-cy=Modal]').should('be.visible');
+      cy.get('[data-cy=Modal]').should('be.visible')
+      cy.get('[data-cy=Modal]').contains('Соус фирменный Space Sauce').should('exist');
     });
 
     it('должен закрывать модальное окно ингредиента по клику на overlay', () => {
